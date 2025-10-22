@@ -152,6 +152,7 @@ void marcar_movimentos(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], Pos
 int main() {
     char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
     int opcao;
+    int c;
     
     printf("===========================================\n");
     printf("  JOGO DE XADREZ - MOVIMENTAÇÃO DE PEÇAS\n");
@@ -164,7 +165,14 @@ int main() {
         printf("3 - Rainha\n");
         printf("0 - Sair\n");
         printf("Opção: ");
-        scanf("%d", &opcao);
+        if (scanf("%d", &opcao) != 1) {
+            printf("\nEntrada inválida! Tente novamente.\n\n");
+            // Limpa o buffer de entrada
+            while ((c = getchar()) != '\n' && c != EOF);
+            continue;
+        }
+        // Limpa o buffer após ler o número
+        while ((c = getchar()) != '\n' && c != EOF);
         
         if (opcao == 0) {
             printf("\nEncerrando o programa...\n");
@@ -196,7 +204,14 @@ int main() {
         int linha_num;
         
         printf("\nDigite a posição da peça (ex: e4): ");
-        scanf(" %c%d", &coluna_char, &linha_num);
+        if (scanf(" %c%d", &coluna_char, &linha_num) != 2) {
+            printf("\nEntrada inválida! Tente novamente.\n\n");
+            // Limpa o buffer de entrada
+            while ((c = getchar()) != '\n' && c != EOF);
+            continue;
+        }
+        // Limpa o buffer após ler a posição
+        while ((c = getchar()) != '\n' && c != EOF);
         
         // Converte para índices do array
         Posicao pos;
