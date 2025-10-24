@@ -42,4 +42,11 @@ bool posicao_valida(Posicao pos);
 char obter_simbolo_peca(TipoPeca tipo);
 const char* obter_nome_peca(TipoPeca tipo);
 
+// Funções de simulação de movimento (Desafio Nível Novato)
+void mover_torre();
+void mover_bispo();
+void mover_rainha();
+// Função de simulação de movimento (Desafio Nível Aventureiro)
+void mover_cavalo();
+
 #endif

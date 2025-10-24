@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra -std=c11 -g
 TARGET = xadrez
 SRCS = xadrez.c
 OBJS = $(SRCS:.c=.o)
