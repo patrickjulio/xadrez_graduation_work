@@ -1,0 +1,13 @@
+# Arquivos compilados
+*.o
+*.obj
+xadrez
+xadrez.exe
+
+# Arquivos temporários
+*~
+*.swp
+*.swo
+
+# Arquivos de debug
+*.dSYM/
