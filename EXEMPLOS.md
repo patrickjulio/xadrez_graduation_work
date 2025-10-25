@@ -26,6 +26,21 @@ Legenda:
 - `*` = Movimento possível
 - `.` = Casa vazia
 
+### Caminho (+) do programa: C3 → H3 (5 casas para a direita)
+
+```
+  a b c d e f g h 
+8 . . . . . . . . 8
+7 . . . . . . . . 7
+6 . . . . . . . . 6
+5 . . . . . . . . 5
+4 . . . . . . . . 4
+3 . . . + + + + T 3
+2 . . . . . . . . 2
+1 . . . . . . . . 1
+  a b c d e f g h 
+```
+
 ## Bispo (Bishop)
 
 O Bispo move-se diagonalmente, podendo percorrer qualquer número de casas nas diagonais.
@@ -49,6 +64,21 @@ Legenda:
 - `B` = Bispo
 - `*` = Movimento possível
 - `.` = Casa vazia
+
+### Caminho (+) do programa: c3 → h8 (5 casas na diagonal cima-direita)
+
+```
+  a b c d e f g h 
+8 . . . . . . . B 8
+7 . . . . . . + . 7
+6 . . . . . + . . 6
+5 . . . . + . . . 5
+4 . . . + . . . . 4
+3 . . . . . . . . 3
+2 . . . . . . . . 2
+1 . . . . . . . . 1
+  a b c d e f g h 
+```
 
 ## Rainha (Queen)
 
@@ -74,13 +104,66 @@ Legenda:
 - `*` = Movimento possível
 - `.` = Casa vazia
 
+### Caminho (+) do programa: h4 → a4 (até a borda à esquerda)
+
+```
+  a b c d e f g h 
+8 . . . . . . . . 8
+7 . . . . . . . . 7
+6 . . . . . . . . 6
+5 . . . . . . . . 5
+4 R + + + + + + . 4
+3 . . . . . . . . 3
+2 . . . . . . . . 2
+1 . . . . . . . . 1
+  a b c d e f g h 
+```
+
+## Cavalo (Knight)
+
+O Cavalo move-se em "L": duas casas em uma direção (horizontal ou vertical) e depois uma casa perpendicular. Ele é a única peça que pode pular outras peças.
+
+**Exemplo: Cavalo em b3**
+
+```
+  a b c d e f g h 
+8 . . . . . . . . 8
+7 . . . . . . . . 7
+6 . . . . . . . . 6
+5 * . * . . . . . 5
+4 . . . * . . . . 4
+3 . C . . . . . . 3
+2 . . . * . . . . 2
+1 * . * . . . . . 1
+  a b c d e f g h 
+```
+
+Legenda:
+- `C` = Cavalo
+- `*` = Movimento possível
+- `.` = Casa vazia
+
+### Caminho (+) do programa: b3 → c5 (duas para cima e uma para a direita)
+
+```
+  a b c d e f g h 
+8 . . . . . . . . 8
+7 . . . . . . . . 7
+6 . . . . . . . . 6
+5 . + C . . . . . 5
+4 . + . . . . . . 4
+3 . . . . . . . . 3
+2 . . . . . . . . 2
+1 . . . . . . . . 1
+  a b c d e f g h 
+```
+
 ## Como Usar o Programa
 
-1. Execute o programa: `./xadrez`
-2. Escolha a peça que deseja demonstrar (1, 2 ou 3)
-3. Digite a posição no formato algébrico (ex: e4, d5, a1)
-4. O programa mostrará todos os movimentos possíveis
-5. Você pode testar outras peças ou sair do programa (opção 0)
+1. Compile e execute o programa.
+2. O programa exibirá as demonstrações das peças em sequência (Torre, Bispo, Rainha e Cavalo).
+3. Pressione ENTER quando solicitado para avançar para a próxima demonstração.
+4. Observe o tabuleiro com a peça posicionada, os movimentos possíveis (`*`) e, quando aplicável, o caminho de um movimento específico (`+`).
 
 ## Características do Sistema de Coordenadas
 

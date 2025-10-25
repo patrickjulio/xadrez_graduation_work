@@ -7,7 +7,7 @@
         {
             "type": "cppdbg",
             "request": "launch",
-            "name": "Debug com GDB",
+            "name": "Debug com GDB (Terminal Integrado)",
             "program": "${workspaceFolder}/xadrez",
             "args": [],
             "stopAtEntry": false,
@@ -22,7 +22,28 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "",
+            "preLaunchTask": "build",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "type": "cppdbg",
+            "request": "launch",
+            "name": "Debug com GDB (Console Externo)",
+            "program": "${workspaceFolder}/xadrez",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Habilitar impressão bonita para gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build",
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

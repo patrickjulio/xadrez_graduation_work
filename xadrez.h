@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define TAMANHO_TABULEIRO 8
 
@@ -20,12 +21,6 @@ typedef struct {
     int linha;
     int coluna;
 } Posicao;
-
-// Estrutura para representar uma peça
-typedef struct {
-    TipoPeca tipo;
-    Posicao posicao;
-} Peca;
 
 // Funções do tabuleiro
 void inicializar_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]);

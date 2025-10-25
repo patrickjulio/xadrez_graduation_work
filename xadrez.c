@@ -1,6 +1,30 @@
 #include "xadrez.h"
 
-// Inicializa o tabuleiro vazio
+// ============================================================================
+// SEÇÃO 1: FUNÇÕES UTILITÁRIAS
+// ============================================================================
+
+// Limpa a tela do terminal
+static void limpar_tela() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+// Imprime uma linha separadora com título
+void imprimir_separador(const char* titulo) {
+    printf("\n===========================================\n");
+    if (titulo) printf("  %s\n", titulo);
+    printf("===========================================\n");
+}
+
+// ============================================================================
+// SEÇÃO 2: FUNÇÕES DE INICIALIZAÇÃO E IMPRESSÃO DO TABULEIRO
+// ============================================================================
+
+// Preenche o tabuleiro com '.'
 void inicializar_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
     for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
         for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
@@ -9,7 +33,7 @@ void inicializar_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO])
     }
 }
 
-// Imprime a linha de colunas (a-h)
+// Imprime letras das colunas do tabuleiro
 static void imprimir_linha_colunas() {
     printf("  ");
     for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
@@ -18,11 +42,10 @@ static void imprimir_linha_colunas() {
     printf("\n");
 }
 
-// Imprime o tabuleiro
+// Imprime o tabuleiro com linhas e colunas
 void imprimir_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
     printf("\n");
     imprimir_linha_colunas();
-    
     for (int i = 0; i < TAMANHO_TABULEIRO; i++) {
         printf("%d ", 8 - i);
         for (int j = 0; j < TAMANHO_TABULEIRO; j++) {
@@ -30,18 +53,27 @@ void imprimir_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO]) {
         }
         printf("%d\n", 8 - i);
     }
-    
     imprimir_linha_colunas();
     printf("\n");
 }
 
-// Verifica se uma posição é válida no tabuleiro
+// Imprime o tabuleiro com título
+void imprimir_tabuleiro_titulo(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], const char* titulo) {
+    printf("\n%s\n", titulo);
+    imprimir_tabuleiro(tabuleiro);
+}
+
+// ============================================================================
+// SEÇÃO 3: FUNÇÕES DE VALIDAÇÃO E MANIPULAÇÃO DE PEÇAS
+// ============================================================================
+
+// Verifica se a posição está dentro dos limites do tabuleiro
 bool posicao_valida(Posicao pos) {
     return pos.linha >= 0 && pos.linha < TAMANHO_TABULEIRO &&
            pos.coluna >= 0 && pos.coluna < TAMANHO_TABULEIRO;
 }
 
-// Retorna o símbolo da peça
+// Retorna o símbolo correspondente ao tipo de peça
 char obter_simbolo_peca(TipoPeca tipo) {
     switch (tipo) {
         case TORRE:   return 'T';
@@ -61,25 +93,6 @@ const char* obter_nome_peca(TipoPeca tipo) {
     }
 }
 
-// Valida movimento da Torre (horizontal ou vertical)
-bool movimento_valido_torre(Posicao origem, Posicao destino) {
-    return (origem.linha == destino.linha && origem.coluna != destino.coluna) ||
-           (origem.coluna == destino.coluna && origem.linha != destino.linha);
-}
-
-// Valida movimento do Bispo (diagonal)
-bool movimento_valido_bispo(Posicao origem, Posicao destino) {
-    int diff_linha = abs(destino.linha - origem.linha);
-    int diff_coluna = abs(destino.coluna - origem.coluna);
-    return diff_linha == diff_coluna && diff_linha > 0;
-}
-
-// Valida movimento da Rainha (horizontal, vertical ou diagonal)
-bool movimento_valido_rainha(Posicao origem, Posicao destino) {
-    return movimento_valido_torre(origem, destino) ||
-           movimento_valido_bispo(origem, destino);
-}
-
 // Identifica o tipo de peça pelo símbolo
 static TipoPeca obter_tipo_por_simbolo(char simbolo) {
     switch (simbolo) {
@@ -90,7 +103,26 @@ static TipoPeca obter_tipo_por_simbolo(char simbolo) {
     }
 }
 
-// Valida movimento baseado no tipo de peça
+// Valida se o movimento é horizontal ou vertical
+bool movimento_valido_torre(Posicao origem, Posicao destino) {
+    return (origem.linha == destino.linha && origem.coluna != destino.coluna) ||
+           (origem.coluna == destino.coluna && origem.linha != destino.linha);
+}
+
+// Valida se o movimento é diagonal
+bool movimento_valido_bispo(Posicao origem, Posicao destino) {
+    int diff_linha = abs(destino.linha - origem.linha);
+    int diff_coluna = abs(destino.coluna - origem.coluna);
+    return diff_linha == diff_coluna && diff_linha > 0;
+}
+
+// Valida se o movimento é horizontal, vertical ou diagonal
+bool movimento_valido_rainha(Posicao origem, Posicao destino) {
+    return movimento_valido_torre(origem, destino) ||
+           movimento_valido_bispo(origem, destino);
+}
+
+// Valida o movimento de acordo com o tipo de peça
 static bool validar_movimento(TipoPeca tipo, Posicao origem, Posicao destino) {
     switch (tipo) {
         case TORRE:   return movimento_valido_torre(origem, destino);
@@ -98,6 +130,16 @@ static bool validar_movimento(TipoPeca tipo, Posicao origem, Posicao destino) {
         case RAINHA:  return movimento_valido_rainha(origem, destino);
         default:      return false;
     }
+}
+
+// ============================================================================
+// SEÇÃO 4: FUNÇÕES DE MOVIMENTAÇÃO NO TABULEIRO
+// ============================================================================
+
+// Inicializa o tabuleiro e posiciona a peça
+void preparar_tabuleiro(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], Posicao pos, char simbolo) {
+    inicializar_tabuleiro(tabuleiro);
+    tabuleiro[pos.linha][pos.coluna] = simbolo;
 }
 
 // Marca os movimentos possíveis de uma peça no tabuleiro
@@ -118,266 +160,186 @@ void marcar_movimentos(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], Pos
     }
 }
 
-// Limpa o buffer de entrada
-static void limpar_buffer() {
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
-}
-
-// Limpa a tela do terminal
-static void limpar_tela() {
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-}
-
-// Lê a opção do menu
-static int ler_opcao_menu() {
-    int opcao;
-    printf("Escolha uma opção:\n");
-    printf("1 - Torre\n");
-    printf("2 - Bispo\n");
-    printf("3 - Rainha\n");
-    printf("4 - Demonstrar movimentos (Desafios Novato e Aventureiro)\n");
-    printf("0 - Sair\n");
-    printf("Opção: ");
-    
-    if (scanf("%d", &opcao) != 1) {
-        limpar_buffer();
-        return -1;
-    }
-    limpar_buffer();
-    return opcao;
-}
-
-// Lê a posição da peça
-static Posicao ler_posicao() {
-    char coluna_char;
-    int linha_num;
-    Posicao pos;
-    
-    do {
-        printf("\nDigite a posição da peça:");
-        printf("\n  - Colunas: de 'a' até 'h'");
-        printf("\n  - Linhas: de 1 até 8");
-        printf("\n  - Formato: letra + número (ex: e4)");
-        printf("\nPosição: ");
-        
-        if (scanf(" %c%d", &coluna_char, &linha_num) != 2) {
-            printf("\nEntrada inválida! Tente novamente.\n");
-            limpar_buffer();
-            continue;
-        }
-        limpar_buffer();
-        
-        pos.coluna = coluna_char - 'a';
-        pos.linha = 8 - linha_num;
-        
-        if (!posicao_valida(pos)) {
-            printf("\nPosição inválida! Use colunas 'a'-'h' e linhas 1-8.\n");
-        }
-    } while (!posicao_valida(pos));
-    
-    return pos;
-}
-
-// Converte opção do menu para tipo de peça
-static TipoPeca opcao_para_tipo(int opcao) {
-    switch (opcao) {
-        case 1: return TORRE;
-        case 2: return BISPO;
-        case 3: return RAINHA;
-        default: return VAZIO;
-    }
-}
-
-// Simula o movimento da Torre usando estrutura for
-// Move 5 casas para a direita
-void mover_torre() {
-    int casas_a_mover = 5; // Número de casas definido no código
-    
-    printf("\n=== MOVIMENTO DA TORRE ===\n");
-    printf("Movendo a Torre 5 casas para a direita:\n\n");
-    
-    // Utiliza estrutura de repetição FOR para simular o movimento
-    for (int casa = 1; casa <= casas_a_mover; casa++) {
-        printf("Direita\n");
-    }
-    
-    printf("\nA Torre se moveu %d casas para a direita.\n", casas_a_mover);
-}
-
-// Simula o movimento do Bispo usando estrutura while
-// Move 5 casas na diagonal (cima e direita)
-void mover_bispo() {
-    int casas_a_mover = 5; // Número de casas definido no código
-    int casa = 1; // Contador de casas percorridas
-    
-    printf("\n=== MOVIMENTO DO BISPO ===\n");
-    printf("Movendo o Bispo 5 casas na diagonal (cima e direita):\n\n");
-    
-    // Utiliza estrutura de repetição WHILE para simular o movimento diagonal
-    while (casa <= casas_a_mover) {
-        printf("Cima Direita\n");
-        casa++;
-    }
-    
-    printf("\nO Bispo se moveu %d casas na diagonal.\n", casas_a_mover);
-}
-
-// Simula o movimento da Rainha usando estrutura do-while
-// Move 8 casas para a esquerda
-void mover_rainha() {
-    int casas_a_mover = 8; // Número de casas definido no código
-    int casa = 1; // Contador de casas percorridas
-    
-    printf("\n=== MOVIMENTO DA RAINHA ===\n");
-    printf("Movendo a Rainha 8 casas para a esquerda:\n\n");
-    
-    // Utiliza estrutura de repetição DO-WHILE para simular o movimento
-    do {
-        printf("Esquerda\n");
-        casa++;
-    } while (casa <= casas_a_mover);
-    
-    printf("\nA Rainha se moveu %d casas para a esquerda.\n", casas_a_mover);
-}
-
-// Simula o movimento do Cavalo usando loops aninhados (for + while)
-// Movimento em "L": duas casas para baixo e uma para a esquerda
-// Saída esperada: "Baixo", "Baixo", "Esquerda"
-void mover_cavalo() {
-    // Quantidades definidas diretamente no código, conforme requisitos
-    int passos_verticais = 2;   // duas casas para baixo
-    int passos_horizontais = 1; // uma casa para a esquerda
-
-    // Mensagens de direção (strings literais)
-    const char* direcao_vertical = "Baixo";
-    const char* direcao_horizontal = "Esquerda";
-
-    printf("\n=== MOVIMENTO DO CAVALO ===\n");
-    printf("Movendo o Cavalo em 'L': duas casas para baixo e uma para a esquerda:\n\n");
-
-    // Loop externo (for): itera pelas fases do movimento (0 = vertical, 1 = horizontal)
-    for (int fase = 0; fase < 2; fase++) {
-        // Define quantos passos fazer na fase atual
-        int passos = (fase == 0) ? passos_verticais : passos_horizontais;
-
-        // Loop interno (while): executa os passos da fase atual
-        int contador = 0;
-        while (contador < passos) {
-            if (fase == 0) {
-                printf("%s\n", direcao_vertical);   // imprime "Baixo"
-            } else {
-                printf("%s\n", direcao_horizontal); // imprime "Esquerda"
-            }
-            contador++;
-        }
-    }
-}
-
-// Demonstra os movimentos de uma peça
-static void demonstrar_movimentos(TipoPeca tipo, Posicao pos) {
-    char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
-    
-    limpar_tela();
-    
+// Marca o caminho de uma peça a partir da origem, usando deslocamento
+void marcar_caminho_e_posicionar(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], Posicao origem, int d_linha, int d_coluna, int num_passos, char simbolo) {
     inicializar_tabuleiro(tabuleiro);
-    tabuleiro[pos.linha][pos.coluna] = obter_simbolo_peca(tipo);
-    
-    char coluna_char = 'a' + pos.coluna;
-    int linha_num = 8 - pos.linha;
-    
-    printf("\n%s posicionada em %c%d:\n", obter_nome_peca(tipo), coluna_char, linha_num);
-    imprimir_tabuleiro(tabuleiro);
-    
-    marcar_movimentos(tabuleiro, pos);
-    
-    printf("Movimentos possíveis (marcados com *):\n");
-    imprimir_tabuleiro(tabuleiro);
-    
-    printf("Legenda:\n");
-    printf("  %c = %s\n", obter_simbolo_peca(tipo), obter_nome_peca(tipo));
-    printf("  * = Movimento possível\n");
-    printf("  . = Casa vazia\n\n");
-    
-    printf("Pressione ENTER para continuar...");
-    getchar();
+    Posicao pos_final = origem;
+    for (int i = 0; i < num_passos; i++) {
+        int nova_linha = pos_final.linha + d_linha;
+        int nova_coluna = pos_final.coluna + d_coluna;
+        if (nova_linha < 0 || nova_linha >= TAMANHO_TABULEIRO || nova_coluna < 0 || nova_coluna >= TAMANHO_TABULEIRO) break;
+        pos_final.linha = nova_linha;
+        pos_final.coluna = nova_coluna;
+        tabuleiro[pos_final.linha][pos_final.coluna] = '+';
+    }
+    tabuleiro[pos_final.linha][pos_final.coluna] = simbolo;
 }
 
+// Marca o caminho de uma peça usando um vetor de movimentos
+void marcar_caminho_vetor(char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO], Posicao origem, int movimentos[][2], int num_movimentos, char simbolo) {
+    inicializar_tabuleiro(tabuleiro);
+    Posicao pos = origem;
+    for (int i = 0; i < num_movimentos; i++) {
+        int nova_linha = pos.linha + movimentos[i][0];
+        int nova_coluna = pos.coluna + movimentos[i][1];
+        if (nova_linha < 0 || nova_linha >= TAMANHO_TABULEIRO || nova_coluna < 0 || nova_coluna >= TAMANHO_TABULEIRO) break;
+        pos.linha = nova_linha;
+        pos.coluna = nova_coluna;
+        tabuleiro[pos.linha][pos.coluna] = '+';
+    }
+    tabuleiro[pos.linha][pos.coluna] = simbolo;
+}
+
+// ============================================================================
+// SEÇÃO 5: FUNÇÕES RECURSIVAS DE MOVIMENTAÇÃO
+// ============================================================================
+
+// Função recursiva para simular o movimento da Torre
+// Imprime "Direita" para cada casa movida
+void mover_torre_recursivo(int casas_restantes) {
+    if (casas_restantes <= 0) return;
+    printf("Direita\n");
+    mover_torre_recursivo(casas_restantes - 1);
+}
+
+// Função recursiva para simular o movimento do Bispo
+// Imprime "Cima Direita" para cada casa movida
+void mover_bispo_recursivo(int casas_restantes) {
+    if (casas_restantes <= 0) return;
+    printf("Cima Direita\n");
+    mover_bispo_recursivo(casas_restantes - 1);
+}
+
+// Função recursiva para simular o movimento da Rainha
+// Imprime "Esquerda" para cada casa movida
+void mover_rainha_recursivo(int casas_restantes) {
+    if (casas_restantes <= 0) return;
+    printf("Esquerda\n");
+    mover_rainha_recursivo(casas_restantes - 1);
+}
+
+// ============================================================================
+// SEÇÃO 6: FUNÇÕES DE DEMONSTRAÇÃO DE PEÇAS
+// ============================================================================
+
+// Demonstração dos movimentos da Torre
+// Inicializa tabuleiro, marca movimentos possíveis, executa movimento recursivo e exibe resultado
+void mover_torre() {
+    char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+    int num_passos = 5;
+    Posicao origem = {5, 2}; // C3
+
+    imprimir_separador("MOVIMENTO DA TORRE");
+    preparar_tabuleiro(tabuleiro, origem, 'T');
+    imprimir_tabuleiro_titulo(tabuleiro, "Torre posicionada em C3:");
+
+    marcar_movimentos(tabuleiro, origem);
+    imprimir_tabuleiro_titulo(tabuleiro, "Movimentos possíveis (marcados com *):");
+
+    printf("Movendo a Torre 5 casas para a direita:\n\n");
+    mover_torre_recursivo(num_passos);
+    printf("\nA Torre se moveu %d casas para a direita.\n", num_passos);
+
+    marcar_caminho_e_posicionar(tabuleiro, origem, 0, 1, num_passos, 'T');
+    imprimir_tabuleiro_titulo(tabuleiro, "Tabuleiro após a movimentação (caminho com '+'):");
+}
+
+// Demonstração dos movimentos do Bispo
+// Usa loops aninhados para simular movimento diagonal
+void mover_bispo() {
+    char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+    int num_passos = 5;
+    Posicao origem = {5, 2}; // c3
+
+    imprimir_separador("MOVIMENTO DO BISPO");
+    preparar_tabuleiro(tabuleiro, origem, 'B');
+    imprimir_tabuleiro_titulo(tabuleiro, "Bispo posicionado em c3:");
+
+    marcar_movimentos(tabuleiro, origem);
+    imprimir_tabuleiro_titulo(tabuleiro, "Movimentos possíveis (marcados com *):");
+
+    printf("Movendo o Bispo 5 casas na diagonal (cima e direita):\n\n");
+    for (int v = 0; v < num_passos; v++) {
+        for (int h = 0; h < 1; h++) {
+            mover_bispo_recursivo(1);
+        }
+    }
+    printf("\nO Bispo se moveu %d casas na diagonal.\n", num_passos);
+
+    marcar_caminho_e_posicionar(tabuleiro, origem, -1, 1, num_passos, 'B');
+    imprimir_tabuleiro_titulo(tabuleiro, "Tabuleiro após a movimentação (caminho com '+'):");
+}
+
+// Demonstração dos movimentos da Rainha
+// Inicializa tabuleiro, marca movimentos possíveis, executa movimento recursivo e exibe resultado
+void mover_rainha() {
+    char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+    int num_passos = 8;
+    Posicao origem = {4, 7}; // H4
+
+    printf("\n=== MOVIMENTO DA RAINHA ===\n");
+    preparar_tabuleiro(tabuleiro, origem, 'R');
+    imprimir_tabuleiro_titulo(tabuleiro, "Rainha posicionada em H4:");
+
+    marcar_movimentos(tabuleiro, origem);
+    imprimir_tabuleiro_titulo(tabuleiro, "Movimentos possíveis (marcados com *):");
+
+    printf("Movendo a Rainha 8 casas para a esquerda:\n\n");
+    mover_rainha_recursivo(num_passos);
+    printf("\nA Rainha se moveu %d casas para a esquerda.\n", num_passos);
+
+    marcar_caminho_e_posicionar(tabuleiro, origem, 0, -1, num_passos, 'R');
+    imprimir_tabuleiro_titulo(tabuleiro, "Tabuleiro após a movimentação (caminho com '+'):");
+}
+
+// Demonstração dos movimentos do Cavalo
+// Usa loops aninhados e vetor para simular movimento em "L"
+void mover_cavalo() {
+    char tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO];
+    Posicao origem = {5, 1}; // b3
+    int movimentos[3][2] = { {-1,0}, {-1,0}, {0,1} }; // duas para cima, uma para direita
+
+    imprimir_separador("MOVIMENTO DO CAVALO");
+    preparar_tabuleiro(tabuleiro, origem, 'C');
+    imprimir_tabuleiro_titulo(tabuleiro, "Cavalo posicionado em b3:");
+
+    printf("Movimento em 'L': duas casas para cima e uma para a direita:\n\n");
+    printf("Cima\nCima\nDireita\n");
+
+    marcar_caminho_vetor(tabuleiro, origem, movimentos, 3, 'C');
+    imprimir_tabuleiro_titulo(tabuleiro, "Tabuleiro após a movimentação (caminho com '+'):");
+}
+
+// ============================================================================
+// SEÇÃO 7: FUNÇÃO PRINCIPAL
+// ============================================================================
+
+// Função principal: executa demonstração dos movimentos das peças
 int main() {
     limpar_tela();
-    
-    printf("===========================================\n");
-    printf("  JOGO DE XADREZ - MOVIMENTAÇÃO DE PEÇAS\n");
-    printf("===========================================\n\n");
-    
-    while (true) {
-        int opcao = ler_opcao_menu();
-        
-        if (opcao == -1) {
-            printf("\nEntrada inválida! Tente novamente.\n\n");
-            continue;
-        }
-        
-        if (opcao == 0) {
-            limpar_tela();
-            printf("\nEncerrando o programa...\n");
-            break;
-        }
-        
-        // Opção 4: Demonstrar movimentos dos desafios (Novato e Aventureiro)
-        if (opcao == 4) {
-            limpar_tela();
-            printf("===========================================\n");
-            printf("  DESAFIOS: NÍVEL NOVATO E AVENTUREIRO\n");
-            printf("  Movimentando as Peças do Xadrez\n");
-            printf("===========================================\n");
-            
-            // Simula movimento da Torre usando FOR
-            mover_torre();
-            printf("\nPressione ENTER para continuar...");
-            getchar();
-            
-            // Simula movimento do Bispo usando WHILE
-            mover_bispo();
-            printf("\nPressione ENTER para continuar...");
-            getchar();
-            
-            // Simula movimento da Rainha usando DO-WHILE
-            mover_rainha();
-            printf("\nPressione ENTER para continuar...");
-            getchar();
+    imprimir_separador("SIMULADOR DE MOVIMENTOS DE XADREZ");
+    printf("  Desafios: Nível Novato, Aventureiro e Avançado\n");
+    printf("\nPressione ENTER para começar...\n");
+    getchar();
+    limpar_tela();
 
-            // Simula movimento do Cavalo usando loop aninhado (FOR + WHILE)
-            // Separado por uma linha em branco (garantida pelo início da função)
-            mover_cavalo();
-            printf("\nPressione ENTER para voltar ao menu...");
-            getchar();
-            
-            limpar_tela();
-            printf("===========================================\n");
-            printf("  JOGO DE XADREZ - MOVIMENTAÇÃO DE PEÇAS\n");
-            printf("===========================================\n\n");
-            continue;
-        }
-        
-        if (opcao < 1 || opcao > 4) {
-            printf("\nOpção inválida! Escolha entre 0 e 4.\n\n");
-            continue;
-        }
-        
-        TipoPeca tipo = opcao_para_tipo(opcao);
-        Posicao pos = ler_posicao();
-        demonstrar_movimentos(tipo, pos);
-        
-        limpar_tela();
-        printf("===========================================\n");
-        printf("  JOGO DE XADREZ - MOVIMENTAÇÃO DE PEÇAS\n");
-        printf("===========================================\n\n");
-    }
-    
+    mover_torre();
+    printf("\nPressione ENTER para continuar...\n");
+    getchar();
+    limpar_tela();
+
+    mover_bispo();
+    printf("\nPressione ENTER para continuar...\n");
+    getchar();
+    limpar_tela();
+
+    mover_rainha();
+    printf("\nPressione ENTER para continuar...\n");
+    getchar();
+    limpar_tela();
+
+    mover_cavalo();
+
+    imprimir_separador("Fim da demonstração");
     return 0;
 }
